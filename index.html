@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>川クイズ200問</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eaf7ff;
+      color: #123;
+      text-align: center;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 20px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .ad {
+      background: #f1f1f1;
+      border: 2px dashed #bbb;
+      padding: 18px;
+      margin: 15px auto;
+      color: #777;
+      border-radius: 10px;
+    }
+
+    #question {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 25px 0;
+    }
+
+    .choice {
+      display: block;
+      width: 90%;
+      margin: 12px auto;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #bbdefb;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .choice:hover {
+      background: #64b5f6;
+      color: white;
+    }
+
+    .correct {
+      background: #66bb6a !important;
+      color: white;
+    }
+
+    .wrong {
+      background: #ef5350 !important;
+      color: white;
+    }
+
+    #result {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 18px;
+    }
+
+    #score {
+      font-size: 18px;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #1e88e5;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1565c0;
+    }
+  </style>
+</head>
+<body>
+
+<header>川クイズ200問</header>
+
+<div class="ad">広告エリア</div>
+
+<div class="container">
+  <div id="progress"></div>
+  <div id="question"></div>
+  <div id="choices"></div>
+  <div id="result"></div>
+  <div id="score"></div>
+  <button id="restartBtn" style="display:none;" onclick="startQuiz()">もう一度挑戦</button>
+</div>
+
+<div class="ad">広告エリア</div>
+
+<script>
+const rivers = [
+  ["信濃川", "日本で最も長い川", "日本"],
+  ["利根川", "関東地方を流れる代表的な川", "日本"],
+  ["石狩川", "北海道を流れる大河", "日本"],
+  ["北上川", "東北地方を流れる長い川", "日本"],
+  ["木曽川", "濃尾平野を流れる川", "日本"],
+  ["淀川", "大阪湾へ流れる川", "日本"],
+  ["吉野川", "四国を代表する川", "日本"],
+  ["筑後川", "九州最大級の川", "日本"],
+  ["天竜川", "長野県から太平洋へ流れる川", "日本"],
+  ["阿武隈川", "福島県を流れる川", "日本"],
+
+  ["ナイル川", "世界最長級の川", "エジプトなど"],
+  ["アマゾン川", "世界最大級の流域面積をもつ川", "ブラジルなど"],
+  ["ミシシッピ川", "アメリカを代表する大河", "アメリカ"],
+  ["長江", "中国で最も長い川", "中国"],
+  ["黄河", "中国文明と関係が深い川", "中国"],
+  ["メコン川", "東南アジアを流れる大河", "東南アジア"],
+  ["ガンジス川", "インドで神聖視される川", "インド"],
+  ["インダス川", "インダス文明と関係が深い川", "パキスタンなど"],
+  ["ドナウ川", "ヨーロッパを流れる国際河川", "ヨーロッパ"],
+  ["ライン川", "ドイツなどを流れる重要河川", "ヨーロッパ"],
+
+  ["テムズ川", "ロンドンを流れる川", "イギリス"],
+  ["セーヌ川", "パリを流れる川", "フランス"],
+  ["ロワール川", "フランス最長の川", "フランス"],
+  ["エルベ川", "ドイツやチェコを流れる川", "ヨーロッパ"],
+  ["ボルガ川", "ヨーロッパ最長の川", "ロシア"],
+  ["ドニエプル川", "ウクライナを流れる大河", "東ヨーロッパ"],
+  ["チグリス川", "メソポタミア文明と関係が深い川", "中東"],
+  ["ユーフラテス川", "メソポタミア文明と関係が深い川", "中東"],
+  ["ヨルダン川", "死海へ流れ込む川", "中東"],
+  ["ザンベジ川", "ヴィクトリアの滝で有名な川", "アフリカ"],
+
+  ["コンゴ川", "アフリカ中央部を流れる大河", "アフリカ"],
+  ["ニジェール川", "西アフリカを流れる大河", "アフリカ"],
+  ["オレンジ川", "南アフリカを流れる川", "アフリカ"],
+  ["リンポポ川", "南部アフリカを流れる川", "アフリカ"],
+  ["マレー川", "オーストラリアを代表する川", "オーストラリア"],
+  ["ダーリング川", "オーストラリアの長い川", "オーストラリア"],
+  ["オビ川", "シベリアを流れる大河", "ロシア"],
+  ["エニセイ川", "シベリアを北へ流れる大河", "ロシア"],
+  ["レナ川", "シベリア東部を流れる川", "ロシア"],
+  ["アムール川", "中国とロシアの国境付近を流れる川", "アジア"],
+
+  ["メコン川", "ベトナム・カンボジアなどを流れる川", "東南アジア"],
+  ["チャオプラヤ川", "バンコクを流れる川", "タイ"],
+  ["イラワジ川", "ミャンマーを代表する川", "ミャンマー"],
+  ["サルウィン川", "東南アジアを流れる国際河川", "アジア"],
+  ["珠江", "中国南部を流れる川", "中国"],
+  ["漢江", "ソウルを流れる川", "韓国"],
+  ["洛東江", "韓国南部を流れる川", "韓国"],
+  ["黒竜江", "アムール川の中国名", "中国・ロシア"],
+  ["紅河", "ベトナム北部を流れる川", "ベトナム"],
+  ["チャオプラヤ川", "タイ中央部を流れる川", "タイ"],
+
+  ["多摩川", "東京都と神奈川県の境付近を流れる川", "日本"],
+  ["荒川", "埼玉県から東京都へ流れる川", "日本"],
+  ["隅田川", "東京下町を流れる川", "日本"],
+  ["神田川", "東京都心を流れる川", "日本"],
+  ["鶴見川", "神奈川県を流れる川", "日本"],
+  ["相模川", "神奈川県を流れる川", "日本"],
+  ["富士川", "日本三大急流の一つ", "日本"],
+  ["最上川", "山形県を流れる川", "日本"],
+  ["球磨川", "熊本県を流れる急流", "日本"],
+  ["黒部川", "黒部峡谷で有名な川", "日本"],
+
+  ["那珂川", "茨城県・栃木県を流れる川", "日本"],
+  ["久慈川", "茨城県を流れる川", "日本"],
+  ["旭川", "岡山県を流れる川", "日本"],
+  ["太田川", "広島市を流れる川", "日本"],
+  ["千曲川", "信濃川の上流部の名前", "日本"],
+  ["庄内川", "愛知県を流れる川", "日本"],
+  ["矢作川", "愛知県を流れる川", "日本"],
+  ["大井川", "静岡県を流れる川", "日本"],
+  ["狩野川", "静岡県東部を流れる川", "日本"],
+  ["紀の川", "和歌山県を流れる川", "日本"],
+
+  ["大和川", "奈良県・大阪府を流れる川", "日本"],
+  ["加古川", "兵庫県を流れる川", "日本"],
+  ["揖斐川", "木曽三川の一つ", "日本"],
+  ["長良川", "鵜飼で有名な川", "日本"],
+  ["五ヶ瀬川", "宮崎県を流れる川", "日本"],
+  ["大淀川", "宮崎県を流れる川", "日本"],
+  ["肝属川", "鹿児島県を流れる川", "日本"],
+  ["岩木川", "青森県を流れる川", "日本"],
+  ["馬淵川", "青森県・岩手県を流れる川", "日本"],
+  ["雄物川", "秋田県を流れる川", "日本"],
+
+  ["コロラド川", "グランドキャニオンを形成した川", "アメリカ"],
+  ["コロンビア川", "北米西部を流れる川", "アメリカ・カナダ"],
+  ["ユーコン川", "アラスカ方面を流れる川", "北米"],
+  ["リオグランデ川", "アメリカとメキシコの国境付近を流れる川", "北米"],
+  ["オリノコ川", "南米北部を流れる大河", "南米"],
+  ["パラナ川", "南米を流れる大河", "南米"],
+  ["ラプラタ川", "南米の大きな河口部", "南米"],
+  ["マグダレナ川", "コロンビアを流れる川", "南米"],
+  ["サンフランシスコ川", "ブラジル東部を流れる川", "ブラジル"],
+  ["トカンチンス川", "ブラジルを流れる川", "ブラジル"]
+];
+
+let quizData = [];
+
+function buildQuizData() {
+  const data = [];
+
+  rivers.forEach((r, index) => {
+    const [name, hint, place] = r;
+
+    const wrongNames = rivers
+      .filter((_, i) => i !== index)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(x => x[0]);
+
+    data.push({
+      q: `${hint}はどの川？`,
+      choices: shuffle([name, ...wrongNames]),
+      answer: name
+    });
+
+    const wrongPlaces = [...new Set(rivers.map(x => x[2]))]
+      .filter(x => x !== place)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+
+    data.push({
+      q: `${name}が主に関係する地域・国は？`,
+      choices: shuffle([place, ...wrongPlaces]),
+      answer: place
+    });
+  });
+
+  return data;
+}
+
+let selectedQuiz = [];
+let current = 0;
+let score = 0;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+  quizData = buildQuizData();
+  selectedQuiz = shuffle([...quizData]).slice(0, 30);
+  current = 0;
+  score = 0;
+
+  document.getElementById("restartBtn").style.display = "none";
+  document.getElementById("result").textContent = "";
+  document.getElementById("score").textContent = "";
+
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = selectedQuiz[current];
+
+  document.getElementById("progress").textContent = 
+    `${current + 1} / ${selectedQuiz.length} 問目`;
+
+  document.getElementById("question").textContent = q.q;
+
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+
+  q.choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.className = "choice";
+    btn.onclick = () => checkAnswer(btn, choice);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(button, choice) {
+  const q = selectedQuiz[current];
+  const buttons = document.querySelectorAll(".choice");
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (choice === q.answer) {
+    button.classList.add("correct");
+    document.getElementById("result").textContent = "正解！";
+    score++;
+  } else {
+    button.classList.add("wrong");
+    document.getElementById("result").textContent = `不正解。正解は「${q.answer}」`;
+    buttons.forEach(btn => {
+      if (btn.textContent === q.answer) btn.classList.add("correct");
+    });
+  }
+
+  setTimeout(() => {
+    current++;
+    document.getElementById("result").textContent = "";
+
+    if (current < selectedQuiz.length) {
+      showQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 1200);
+}
+
+function finishQuiz() {
+  document.getElementById("question").textContent = "クイズ終了！";
+  document.getElementById("choices").innerHTML = "";
+  document.getElementById("progress").textContent = "";
+  document.getElementById("score").textContent =
+    `あなたのスコア：${score} / ${selectedQuiz.length} 問`;
+  document.getElementById("restartBtn").style.display = "inline-block";
+}
+
+startQuiz();
+</script>
+
+</body>
+</html>
